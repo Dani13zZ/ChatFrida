@@ -27,6 +27,7 @@ public class LoginActivity extends AppCompatActivity {
     DatabaseReference BD;
     DatabaseReference chatUsr;
 
+
     private int MY_PERMISSIONS_REQUEST_READ_CONTACTS ;
     private FusedLocationProviderClient mFusedLocationClient;
 
