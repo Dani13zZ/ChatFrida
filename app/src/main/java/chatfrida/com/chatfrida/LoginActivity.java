@@ -26,7 +26,7 @@ public class LoginActivity extends AppCompatActivity {
     FirebaseDatabase database = FirebaseDatabase.getInstance();
     DatabaseReference BD;
     DatabaseReference chatUsr;
-
+    //este comentario
     private int MY_PERMISSIONS_REQUEST_READ_CONTACTS ;
     private FusedLocationProviderClient mFusedLocationClient;
 
