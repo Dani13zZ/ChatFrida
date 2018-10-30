@@ -1,0 +1,99 @@
+{
+  "project_info": {
+    "project_number": "59272472311",
+    "firebase_url": "https://sistema-experto-frida.firebaseio.com",
+    "project_id": "sistema-experto-frida",
+    "storage_bucket": "sistema-experto-frida.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:59272472311:android:9cdaef3e0ed9defa",
+        "android_client_info": {
+          "package_name": "chatfrida.com.chatfrida"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "59272472311-irv3mlr06cddt8oo8c12g6cop1gddcce.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "chatfrida.com.chatfrida",
+            "certificate_hash": "f9ac883ac5707678405f79decd9dc0bc09cef67e"
+          }
+        },
+        {
+          "client_id": "59272472311-stv1maior05lmomiflr23p1jakudpsb1.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBppHKLVaIRw2FLutw45n_9LRMKND_xffQ"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "59272472311-9qa78i6vvfdc7e1gbqoee6o2ll5r6igo.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:59272472311:android:8a6274249c481ac1",
+        "android_client_info": {
+          "package_name": "fridase.com.sistema_experto"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "59272472311-f3jvm46g1us6pafpt67ekoricm37vgbe.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "fridase.com.sistema_experto",
+            "certificate_hash": "f9ac883ac5707678405f79decd9dc0bc09cef67e"
+          }
+        },
+        {
+          "client_id": "59272472311-stv1maior05lmomiflr23p1jakudpsb1.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBppHKLVaIRw2FLutw45n_9LRMKND_xffQ"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "59272472311-9qa78i6vvfdc7e1gbqoee6o2ll5r6igo.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

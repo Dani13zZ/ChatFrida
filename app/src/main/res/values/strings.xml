@@ -1,0 +1,15 @@
+<resources>
+    <string name="app_name">FRIDA</string>
+    <string name="title_activity_login">Bienvenido</string>
+    <!-- Strings login -->
+    <string name="nombre">Ingresa tu nombre</string>
+    <string name="aceptar">ACEPTAR</string>
+    <string name="desc_img_login">Logo</string>
+
+    <!--Strings Activity_main-->
+    <string name="desc_img_msj">Logo</string>
+    <string name="msj">Escribe un mensaje</string>
+    <string name="btnDesc">btn enviar</string>
+
+
+</resources>
