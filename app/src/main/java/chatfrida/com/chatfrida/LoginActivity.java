@@ -37,8 +37,6 @@ public class LoginActivity extends AppCompatActivity {
         btnAceptar = (Button) findViewById(R.id.btnLogin);
         txtNombre = (EditText) findViewById(R.id.txtNombre);
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
-
-
     }
     public void onClick(View view){
         Intent siguiente = new Intent(LoginActivity.this, MainActivity.class);
