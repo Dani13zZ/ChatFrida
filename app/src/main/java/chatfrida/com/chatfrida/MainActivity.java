@@ -64,6 +64,8 @@ public class MainActivity extends AppCompatActivity implements AIListener{
         recyclerView.setLayoutManager(linearLayoutManager);
 
         ref = FirebaseDatabase.getInstance().getReference("Usuarios/"+nombre);
+
+
         ref.keepSynced(false);
 
         final AIConfiguration config = new AIConfiguration("4de3402e39624c3aaceebabe2b3b4b36",
@@ -91,7 +93,7 @@ public class MainActivity extends AppCompatActivity implements AIListener{
                 if (!message.equals("")) {
 
                     ChatMessage chatMessage = new ChatMessage(message, "user");
-                    ref.child("chat").push().setValue(chatMessage);
+                    ref.child("chat/").push().setValue(chatMessage);
 
                     aiRequest.setQuery(message);
                     new AsyncTask<AIRequest,Void,AIResponse>(){

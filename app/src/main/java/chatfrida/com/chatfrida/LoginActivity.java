@@ -47,6 +47,10 @@ public class LoginActivity extends AppCompatActivity {
             BD = database.getReference("Usuarios/"+nombre+"/Ubicacion");
             chatUsr = database.getReference("Usuarios/"+nombre+"/chat");
             chatUsr.removeValue();
+
+            ChatMessage chatMessage = new ChatMessage("Bienvenido "+nombre, "bot");
+            chatUsr.push().setValue(chatMessage);
+
             obtener_cordenadas();
             Bundle mibundle =new Bundle();
             mibundle.putString("nombre",nombre);
