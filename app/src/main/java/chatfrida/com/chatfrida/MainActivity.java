@@ -40,7 +40,7 @@ public class MainActivity extends AppCompatActivity implements AIListener{
     EditText txtMsj;
     RelativeLayout addBtn;
     DatabaseReference ref;
-    FirebaseRecyclerAdapter<ChatMessage,chat_rec> adapter;
+    FirebaseRecyclerAdapter<ChatMensaje,ChatRecycler> adapter;
     Boolean flagFab = true;
     String nombre;
 
@@ -92,8 +92,8 @@ public class MainActivity extends AppCompatActivity implements AIListener{
 
                 if (!message.equals("")) {
 
-                    ChatMessage chatMessage = new ChatMessage(message, "user");
-                    ref.child("chat/").push().setValue(chatMessage);
+                    ChatMensaje chatMensaje = new ChatMensaje(message, "user");
+                    ref.child("chat/").push().setValue(chatMensaje);
 
                     aiRequest.setQuery(message);
                     new AsyncTask<AIRequest,Void,AIResponse>(){
@@ -114,12 +114,12 @@ public class MainActivity extends AppCompatActivity implements AIListener{
                                 Result result = response.getResult();
                                 String reply = result.getFulfillment().getSpeech();
                                 if (reply.isEmpty()){
-                                    ChatMessage chatMessage = new ChatMessage("no entiendo", "bot");
-                                    ref.child("chat").push().setValue(chatMessage);
+                                    ChatMensaje chatMensaje = new ChatMensaje("no entiendo", "bot");
+                                    ref.child("chat").push().setValue(chatMensaje);
                                 }
                                 else{
-                                    ChatMessage chatMessage = new ChatMessage(reply, "bot");
-                                    ref.child("chat").push().setValue(chatMessage);
+                                    ChatMensaje chatMensaje = new ChatMensaje(reply, "bot");
+                                    ref.child("chat").push().setValue(chatMensaje);
                                 }
                             }
                         }
@@ -158,9 +158,9 @@ public class MainActivity extends AppCompatActivity implements AIListener{
             }
         });
 
-        adapter = new FirebaseRecyclerAdapter<ChatMessage, chat_rec>(ChatMessage.class,R.layout.msglist,chat_rec.class,ref.child("chat")) {
+        adapter = new FirebaseRecyclerAdapter<ChatMensaje, ChatRecycler>(ChatMensaje.class,R.layout.msglist,ChatRecycler.class,ref.child("chat")) {
             @Override
-            protected void populateViewHolder(chat_rec viewHolder, ChatMessage model, int position) {
+            protected void populateViewHolder(ChatRecycler viewHolder, ChatMensaje model, int position) {
                 if (model.getMsgUser().equals("user")) {
                     viewHolder.rightText.setText(model.getMsgText());
                     viewHolder.rightText.setVisibility(View.VISIBLE);
@@ -223,13 +223,13 @@ public class MainActivity extends AppCompatActivity implements AIListener{
     public void onResult(ai.api.model.AIResponse response) {
         Result result = response.getResult();
         String message = result.getResolvedQuery();
-        ChatMessage chatMessage0 = new ChatMessage(message, "user");
-        ref.child("chat").push().setValue(chatMessage0);
+        ChatMensaje chatMensaje0 = new ChatMensaje(message, "user");
+        ref.child("chat").push().setValue(chatMensaje0);
 
         mTextToSpeech.speak(result.getFulfillment().getSpeech(), TextToSpeech.QUEUE_FLUSH, null, null);
         String reply = result.getFulfillment().getSpeech();
-        ChatMessage chatMessage = new ChatMessage(reply, "bot");
-        ref.child("chat").push().setValue(chatMessage);
+        ChatMensaje chatMensaje = new ChatMensaje(reply, "bot");
+        ref.child("chat").push().setValue(chatMensaje);
     }
 
     @Override

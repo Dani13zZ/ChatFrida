@@ -3,7 +3,13 @@ package chatfrida.com.chatfrida;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
+import android.location.LocationProvider;
+import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -13,11 +19,12 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.Locale;
 
 public class LoginActivity extends AppCompatActivity {
     Button btnAceptar;
@@ -26,9 +33,11 @@ public class LoginActivity extends AppCompatActivity {
     FirebaseDatabase database = FirebaseDatabase.getInstance();
     DatabaseReference BD;
     DatabaseReference chatUsr;
+    String direccion;
+    double latitud;
+    double longitud;
 
-    private int MY_PERMISSIONS_REQUEST_READ_CONTACTS ;
-    private FusedLocationProviderClient mFusedLocationClient;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,23 +45,41 @@ public class LoginActivity extends AppCompatActivity {
         setContentView(R.layout.activity_login);
         btnAceptar = (Button) findViewById(R.id.btnLogin);
         txtNombre = (EditText) findViewById(R.id.txtNombre);
-        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION,}, 1000);
+        } else {
+            locationStart();
+        }
     }
+
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        if (requestCode == 1000) {
+            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                locationStart();
+                return;
+            }
+        }
+    }
+
     public void onClick(View view){
         Intent siguiente = new Intent(LoginActivity.this, MainActivity.class);
         nombre = txtNombre.getText().toString();
-        if (validar_nombre(nombre) == true) {
+        if (validarNombre(nombre) == true) {
 
             Toast.makeText(this, nombre, Toast.LENGTH_LONG).show();
             BD = database.getReference("Usuarios/"+nombre+"/Ubicacion");
             chatUsr = database.getReference("Usuarios/"+nombre+"/chat");
             chatUsr.removeValue();
 
-            ChatMessage chatMessage = new ChatMessage("Bienvenido "+nombre, "bot");
+            ChatMensaje chatMessage = new ChatMensaje("Bienvenido "+nombre, "bot");
             chatUsr.push().setValue(chatMessage);
 
-            obtener_cordenadas();
-            Bundle mibundle =new Bundle();
+            //  obtener_cordenadas();
+            BD.child("Latitud").setValue(latitud);
+            BD.child("Longitud").setValue(longitud);
+            BD.child("Direccion").setValue(direccion);
+            Bundle mibundle = new Bundle();
             mibundle.putString("nombre",nombre);
 
             siguiente.putExtras(mibundle);
@@ -64,33 +91,116 @@ public class LoginActivity extends AppCompatActivity {
         }
     }
 
-    public void obtener_cordenadas() {
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
-                != PackageManager.PERMISSION_GRANTED &&
-                ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)
-                        != PackageManager.PERMISSION_GRANTED) {
 
-            ActivityCompat.requestPermissions(LoginActivity.this,
-                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                    MY_PERMISSIONS_REQUEST_READ_CONTACTS);
+    private void locationStart() {
+        LocationManager mlocManager = (LocationManager) getSystemService(LoginActivity.LOCATION_SERVICE);
+        Localizacion localizacion = new Localizacion();
+        localizacion.setLoginActivity(this);
+        final boolean gpsEnabled = mlocManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+        if (!gpsEnabled) {
+            Intent settingsIntent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+            startActivity(settingsIntent);
+        }
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION,}, 1000);
             return;
         }
-        mFusedLocationClient.getLastLocation()
-                .addOnSuccessListener(this, new OnSuccessListener<Location>() {
-                    @Override
-                    public void onSuccess(Location location) {
-                        if (location != null) {
-                            Log.e("latitud: ",+ location.getLatitude()+"longitud: "+location.getLongitude());
-                            BD.child("Latitud").setValue(location.getLatitude());
-                            BD.child("Longitud").setValue(location.getLongitude());
-                        }
-                    }
-                });
+        mlocManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, (LocationListener) localizacion);
+        mlocManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, (LocationListener) localizacion);
+
     }
-    public boolean validar_nombre(String nombre){
+
+
+    public void setLocation(Location loc) {
+        //Obtener la direccion de la calle a partir de la latitud y la longitud
+
+        if (loc.getLatitude() != 0.0 && loc.getLongitude() != 0.0) {
+            try {
+                Geocoder geocoder = new Geocoder(this, Locale.getDefault());
+                List<Address> list = geocoder.getFromLocation(
+                        loc.getLatitude(), loc.getLongitude(), 1);
+                if (!list.isEmpty()) {
+                    Address DirCalle = list.get(0);
+                    latitud = loc.getLatitude();
+                    longitud = loc.getLongitude();
+                    direccion = DirCalle.getAddressLine(0);
+
+                }
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public boolean validarNombre(String nombre){
         if (nombre.equals("")){
             return  false;
         }else
             return true;
     }
+
+    public class Localizacion implements LocationListener {
+        LoginActivity loginActivity;
+
+        public LoginActivity getLoginActivity() {
+            return loginActivity;
+        }
+
+        public void setLoginActivity(LoginActivity loginActivity) {
+            this.loginActivity = loginActivity;
+        }
+
+        @Override
+        public void onLocationChanged(Location loc) {
+            // Este metodo se ejecuta cada vez que el GPS recibe nuevas coordenadas
+            // debido a la deteccion de un cambio de ubicacion
+
+            loc.getLatitude();
+            loc.getLongitude();
+
+            String Text = "Mi ubicacion actual es: " + "\n Lat = "
+                    + loc.getLatitude() + "\n Long = " + loc.getLongitude();
+
+            loginActivity.setLocation(loc);
+        }
+
+        @Override
+        public void onProviderDisabled(String provider) {
+            // Este metodo se ejecuta cuando el GPS es desactivado
+            Toast.makeText(loginActivity, "GPS desactivado", Toast.LENGTH_SHORT).show();
+        }
+
+        @Override
+        public void onProviderEnabled(String provider) {
+            // Este metodo se ejecuta cuando el GPS es activado
+            Toast.makeText(loginActivity, "GPS activado", Toast.LENGTH_SHORT).show();
+        }
+
+        @Override
+        public void onStatusChanged(String provider, int status, Bundle extras) {
+            switch (status) {
+                case LocationProvider.AVAILABLE:
+                    Log.d("debug", "LocationProvider.AVAILABLE");
+                    break;
+                case LocationProvider.OUT_OF_SERVICE:
+                    Log.d("debug", "LocationProvider.OUT_OF_SERVICE");
+                    break;
+                case LocationProvider.TEMPORARILY_UNAVAILABLE:
+                    Log.d("debug", "LocationProvider.TEMPORARILY_UNAVAILABLE");
+                    break;
+            }
+        }
+    }
+
+
+
 }
+
+
+
+
+
+
+
+
