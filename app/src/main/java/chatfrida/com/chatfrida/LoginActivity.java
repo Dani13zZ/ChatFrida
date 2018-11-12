@@ -54,7 +54,7 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-        if (requestCode == 1000) {
+        if (requestCode == 10000) {
             if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 locationStart();
                 return;
@@ -158,14 +158,13 @@ public class LoginActivity extends AppCompatActivity {
 
         @Override
         public void onProviderDisabled(String provider) {
-            // Este metodo se ejecuta cuando el GPS es desactivado
-            Toast.makeText(loginActivity, "GPS desactivado", Toast.LENGTH_SHORT).show();
+            Toast.makeText(loginActivity, "GPS Desaactivado", Toast.LENGTH_SHORT).show();
         }
 
         @Override
         public void onProviderEnabled(String provider) {
             // Este metodo se ejecuta cuando el GPS es activado
-            Toast.makeText(loginActivity, "GPS activado", Toast.LENGTH_SHORT).show();
+            Toast.makeText(loginActivity, "GPS Activado", Toast.LENGTH_SHORT).show();
         }
 
         @Override

@@ -6,6 +6,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.speech.tts.TextToSpeech;
+import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -22,8 +23,12 @@ import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import ai.api.AIDataService;
 import ai.api.AIListener;
@@ -32,6 +37,7 @@ import ai.api.android.AIConfiguration;
 import ai.api.android.AIService;
 import ai.api.model.AIRequest;
 import ai.api.model.AIResponse;
+import ai.api.model.Metadata;
 import ai.api.model.Result;
 
 public class MainActivity extends AppCompatActivity implements AIListener{
@@ -51,21 +57,19 @@ public class MainActivity extends AppCompatActivity implements AIListener{
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        recibir_nombre();
-        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.RECORD_AUDIO},1);
-
         recyclerView = findViewById(R.id.recyclerView);
         txtMsj = findViewById(R.id.txtMsj);
         addBtn = findViewById(R.id.addBtn);
-
         recyclerView.setHasFixedSize(true);
+
+        recibir_nombre();
+        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.RECORD_AUDIO},1);
+
         final LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
         linearLayoutManager.setStackFromEnd(true);
+
         recyclerView.setLayoutManager(linearLayoutManager);
-
         ref = FirebaseDatabase.getInstance().getReference("Usuarios/"+nombre);
-
-
         ref.keepSynced(false);
 
         final AIConfiguration config = new AIConfiguration("4de3402e39624c3aaceebabe2b3b4b36",
@@ -221,16 +225,40 @@ public class MainActivity extends AppCompatActivity implements AIListener{
 
     @Override
     public void onResult(ai.api.model.AIResponse response) {
-        Result result = response.getResult();
+       final Result result = response.getResult();
         String message = result.getResolvedQuery();
+
         ChatMensaje chatMensaje0 = new ChatMensaje(message, "user");
         ref.child("chat").push().setValue(chatMensaje0);
 
         mTextToSpeech.speak(result.getFulfillment().getSpeech(), TextToSpeech.QUEUE_FLUSH, null, null);
-        String reply = result.getFulfillment().getSpeech();
-        ChatMensaje chatMensaje = new ChatMensaje(reply, "bot");
-        ref.child("chat").push().setValue(chatMensaje);
+        final String reply = result.getFulfillment().getSpeech();
+
+        final Metadata metadata = result.getMetadata();
+        if (metadata != null) {
+            if(metadata.getIntentName().equals("Ubicacion")){
+                ref.child("Ubicacion/Direccion").addValueEventListener(new ValueEventListener() {
+                    String ubicacion;
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                         ubicacion = dataSnapshot.getValue().toString();
+                         ChatMensaje chatMensaje = new ChatMensaje(reply +" : "+ ubicacion, "bot");
+                         ref.child("chat").push().setValue(chatMensaje);
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                    }
+                });
+            }else{
+                Toast.makeText(this, metadata.getIntentName(), Toast.LENGTH_SHORT).show();
+                ChatMensaje chatMensaje = new ChatMensaje(reply, "bot");
+                ref.child("chat").push().setValue(chatMensaje);
+            }
+        }
     }
+
 
     @Override
     public void onError(ai.api.model.AIError error) {
