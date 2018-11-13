@@ -65,27 +65,24 @@ public class LoginActivity extends AppCompatActivity {
     public void onClick(View view){
         Intent siguiente = new Intent(LoginActivity.this, MainActivity.class);
         nombre = txtNombre.getText().toString();
-        if (validarNombre(nombre) == true) {
 
+        if (validarNombre(nombre) == true) {
             Toast.makeText(this, nombre, Toast.LENGTH_LONG).show();
             BD = database.getReference("Usuarios/"+nombre+"/Ubicacion");
             chatUsr = database.getReference("Usuarios/"+nombre+"/chat");
             chatUsr.removeValue();
-
             ChatMensaje chatMessage = new ChatMensaje("Bienvenido "+nombre, "bot");
             chatUsr.push().setValue(chatMessage);
-
-            //  obtener_cordenadas();
             BD.child("Latitud").setValue(latitud);
             BD.child("Longitud").setValue(longitud);
             BD.child("Direccion").setValue(direccion);
+
             Bundle mibundle = new Bundle();
             mibundle.putString("nombre",nombre);
-
             siguiente.putExtras(mibundle);
             startActivity(siguiente);
-        }
-        else {
+
+        }else{
             Toast.makeText(this, "el nombre no debe estar vacio", Toast.LENGTH_SHORT).show();
             txtNombre.setText("");
         }
@@ -113,16 +110,16 @@ public class LoginActivity extends AppCompatActivity {
 
     }
 
-    public void setLocation(Location loc) {
-        if (loc.getLatitude() != 0.0 && loc.getLongitude() != 0.0) {
+    public void setLocation(Location location) {
+        if (location.getLatitude() != 0.0 && location.getLongitude() != 0.0) {
             try {
                 Geocoder geocoder = new Geocoder(this, Locale.getDefault());
                 List<Address> list = geocoder.getFromLocation(
-                        loc.getLatitude(), loc.getLongitude(), 1);
+                        location.getLatitude(), location.getLongitude(), 1);
                 if (!list.isEmpty()) {
                     Address DirCalle = list.get(0);
-                    latitud = loc.getLatitude();
-                    longitud = loc.getLongitude();
+                    latitud = location.getLatitude();
+                    longitud = location.getLongitude();
                     direccion = DirCalle.getAddressLine(0);
                 }
             } catch (IOException e) {
@@ -150,10 +147,10 @@ public class LoginActivity extends AppCompatActivity {
         }
 
         @Override
-        public void onLocationChanged(Location loc) {
-            loc.getLatitude();
-            loc.getLongitude();
-            loginActivity.setLocation(loc);
+        public void onLocationChanged(Location location) {
+            location.getLatitude();
+            location.getLongitude();
+            loginActivity.setLocation(location);
         }
 
         @Override

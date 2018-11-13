@@ -18,7 +18,6 @@ public class ChatMensaje {
     }
 
     public void setMsgText(String msgText) {
-
         this.msgText = msgText;
     }
 
@@ -27,7 +26,6 @@ public class ChatMensaje {
     }
 
     public void setMsgUser(String msgUser) {
-
         this.msgUser = msgUser;
     }
 }

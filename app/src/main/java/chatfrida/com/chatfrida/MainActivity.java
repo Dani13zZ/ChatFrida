@@ -23,7 +23,6 @@ import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
-import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -62,7 +61,7 @@ public class MainActivity extends AppCompatActivity implements AIListener{
         addBtn = findViewById(R.id.addBtn);
         recyclerView.setHasFixedSize(true);
 
-        recibir_nombre();
+        recibirNombre();
         ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.RECORD_AUDIO},1);
 
         final LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
@@ -217,28 +216,28 @@ public class MainActivity extends AppCompatActivity implements AIListener{
         v.startAnimation(anim_out);
     }
 
-    //Recupera el nombre de LoginActivity
-    public void recibir_nombre(){
+
+    public void recibirNombre(){
         Bundle extras = this.getIntent().getExtras();
         this.nombre = extras.getString("nombre");
     }
 
     @Override
     public void onResult(ai.api.model.AIResponse response) {
-       final Result result = response.getResult();
+        final Result result = response.getResult();
         String message = result.getResolvedQuery();
-
         ChatMensaje chatMensaje0 = new ChatMensaje(message, "user");
         ref.child("chat").push().setValue(chatMensaje0);
 
         mTextToSpeech.speak(result.getFulfillment().getSpeech(), TextToSpeech.QUEUE_FLUSH, null, null);
         final String reply = result.getFulfillment().getSpeech();
-
         final Metadata metadata = result.getMetadata();
+
         if (metadata != null) {
             if(metadata.getIntentName().equals("Ubicacion")){
                 ref.child("Ubicacion/Direccion").addValueEventListener(new ValueEventListener() {
                     String ubicacion;
+
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
                          ubicacion = dataSnapshot.getValue().toString();
@@ -248,10 +247,10 @@ public class MainActivity extends AppCompatActivity implements AIListener{
 
                     @Override
                     public void onCancelled(@NonNull DatabaseError databaseError) {
-
                     }
+
                 });
-            }else{
+            } else{
                 Toast.makeText(this, metadata.getIntentName(), Toast.LENGTH_SHORT).show();
                 ChatMensaje chatMensaje = new ChatMensaje(reply, "bot");
                 ref.child("chat").push().setValue(chatMensaje);
