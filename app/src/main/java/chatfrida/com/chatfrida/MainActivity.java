@@ -1,7 +1,9 @@
 package chatfrida.com.chatfrida;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
@@ -43,6 +45,7 @@ public class MainActivity extends AppCompatActivity implements AIListener{
 
     RecyclerView recyclerView;
     EditText txtMsj;
+    ImageView btnMapa;
     RelativeLayout addBtn;
     DatabaseReference ref;
     FirebaseRecyclerAdapter<ChatMensaje,ChatRecycler> adapter;
@@ -51,7 +54,10 @@ public class MainActivity extends AppCompatActivity implements AIListener{
 
     private TextToSpeech mTextToSpeech;
     private AIService aiService;
+     String myLatitud;
+     String myLongitud;
 
+    @SuppressLint("WrongViewCast")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -60,8 +66,9 @@ public class MainActivity extends AppCompatActivity implements AIListener{
         txtMsj = findViewById(R.id.txtMsj);
         addBtn = findViewById(R.id.addBtn);
         recyclerView.setHasFixedSize(true);
+        btnMapa = findViewById(R.id.btnMapa);
 
-        recibirNombre();
+        recibirDatos();
         ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.RECORD_AUDIO},1);
 
         final LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
@@ -217,9 +224,11 @@ public class MainActivity extends AppCompatActivity implements AIListener{
     }
 
 
-    public void recibirNombre(){
+    public void recibirDatos(){
         Bundle extras = this.getIntent().getExtras();
         this.nombre = extras.getString("nombre");
+        this.myLatitud = extras.getString("latitud");
+        this.myLongitud = extras.getString("longitud");
     }
 
     @Override
@@ -283,4 +292,14 @@ public class MainActivity extends AppCompatActivity implements AIListener{
     public void onListeningFinished() {
         Toast.makeText(this, "mensaje finalizado", Toast.LENGTH_SHORT).show();
     }
+    public void onClickMap(View view){
+        Intent siguiente = new Intent(MainActivity.this, MapasActivity.class);
+        Bundle mibundle = new Bundle();
+        mibundle.putString("nombre",nombre);
+        mibundle.putString("latitud", myLatitud);
+        mibundle.putString("longitud", myLongitud);
+        siguiente.putExtras(mibundle);
+        startActivity(siguiente);
+    }
+
 }

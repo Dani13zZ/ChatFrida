@@ -64,9 +64,21 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true">
 
+        <ImageView
+            android:id="@+id/btnMapa"
+            android:layout_width="43dp"
+            android:layout_height="41dp"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true"
+            android:layout_marginStart="7dp"
+            android:layout_marginTop="11dp"
+            android:layout_marginEnd="27dp"
+            android:contentDescription="@string/btnDesc"
+            android:onClick="onClickMap"
+            android:src="@drawable/mapa" />
 
         <RelativeLayout
-            android:layout_width="236dp"
+            android:layout_width="247dp"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
             android:layout_marginStart="10dp"
@@ -111,27 +123,7 @@
                 android:tint="@color/rojo" />
         </RelativeLayout>
 
-        <RelativeLayout
-            android:id="@+id/addmapa"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:layout_alignParentEnd="true"
-            android:layout_centerInParent="true"
-            android:layout_marginEnd="5dp"
-            android:layout_marginBottom="10dp"
-            android:background="@drawable/back_addtask"
-            >
 
-            <ImageView
-                android:id="@+id/imgMapa"
-                android:layout_width="43dp"
-                android:layout_height="41dp"
-                android:layout_centerHorizontal="true"
-                android:layout_centerVertical="true"
-                android:contentDescription="@string/btnDesc"
-                android:src="@drawable/m"
-                android:tint="@color/rojo" />
-        </RelativeLayout>
 
     </RelativeLayout>
 

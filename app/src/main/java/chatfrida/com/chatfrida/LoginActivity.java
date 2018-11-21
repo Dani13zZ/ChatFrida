@@ -79,6 +79,8 @@ public class LoginActivity extends AppCompatActivity {
 
             Bundle mibundle = new Bundle();
             mibundle.putString("nombre",nombre);
+            mibundle.putString("latitud", String.valueOf(latitud));
+            mibundle.putString("longitud", String.valueOf(longitud));
             siguiente.putExtras(mibundle);
             startActivity(siguiente);
 
