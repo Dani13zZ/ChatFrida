@@ -44,6 +44,7 @@ dependencies {
     implementation 'ai.api:libai:1.6.12'
 
     //Mapas
+    //implementation 'org.osmdroid:osmdroid-android:5.6.4'
     implementation 'com.github.MKergall:osmbonuspack:6.5.2'
 
     //soporte
