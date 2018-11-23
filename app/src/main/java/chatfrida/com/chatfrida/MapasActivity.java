@@ -43,7 +43,7 @@ public class MapasActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_mapas);
-        ref = database.getReference("Lugares/Tipo/Comida");
+        ref = database.getReference("Lugares");
         recibirDatos();
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
         StrictMode.setThreadPolicy(policy);

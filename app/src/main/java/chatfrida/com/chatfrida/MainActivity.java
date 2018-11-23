@@ -9,6 +9,7 @@ import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.speech.tts.TextToSpeech;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -16,6 +17,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -25,11 +27,21 @@ import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
+import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
+import com.google.gson.JsonElement;
+
+import org.osmdroid.util.GeoPoint;
+import org.osmdroid.views.overlay.Marker;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import ai.api.AIDataService;
 import ai.api.AIListener;
@@ -41,21 +53,24 @@ import ai.api.model.AIResponse;
 import ai.api.model.Metadata;
 import ai.api.model.Result;
 
-public class MainActivity extends AppCompatActivity implements AIListener{
 
+public class MainActivity extends AppCompatActivity implements AIListener{
+    Lugar lugar;
     RecyclerView recyclerView;
     EditText txtMsj;
     ImageView btnMapa;
     RelativeLayout addBtn;
     DatabaseReference ref;
+    DatabaseReference BDLugares;
     FirebaseRecyclerAdapter<ChatMensaje,ChatRecycler> adapter;
     Boolean flagFab = true;
     String nombre;
-
+    String comida;
     private TextToSpeech mTextToSpeech;
     private AIService aiService;
      String myLatitud;
      String myLongitud;
+
 
     @SuppressLint("WrongViewCast")
     @Override
@@ -67,7 +82,7 @@ public class MainActivity extends AppCompatActivity implements AIListener{
         addBtn = findViewById(R.id.addBtn);
         recyclerView.setHasFixedSize(true);
         btnMapa = findViewById(R.id.btnMapa);
-
+        BDLugares = FirebaseDatabase.getInstance().getReference("Lugares");
         recibirDatos();
         ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.RECORD_AUDIO},1);
 
@@ -200,8 +215,37 @@ public class MainActivity extends AppCompatActivity implements AIListener{
             }
         });
         recyclerView.setAdapter(adapter);
+    }
+
+
+    public void obtenerLugarSeleccionado(String c) {
+                Query q = BDLugares.orderByChild("Comida").equalTo(c);
+                 ArrayList<String> listado = new ArrayList<String>();
+
+                q.addListenerForSingleValueEvent(new ValueEventListener() {
+
+
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        String datos="";
+                        for(DataSnapshot datasnapshot: dataSnapshot.getChildren()) {
+
+                            lugar = datasnapshot.getValue(Lugar.class);
+                            datos = datos + " -, " + lugar.Nombre;
+                            // Toast.makeText(MainActivity.this, "He encontrado "+cont, Toast.LENGTH_LONG).show();
+                        }
+                    //    System.out.println("Consulta " + datos);
+                    }
+
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                });;
 
     }
+
     public void ImageViewAnimatedChange(Context c, final ImageView v, final Bitmap new_image) {
         final Animation anim_out = AnimationUtils.loadAnimation(c, R.anim.zoom_out);
         final Animation anim_in  = AnimationUtils.loadAnimation(c, R.anim.zoom_in);
@@ -223,7 +267,6 @@ public class MainActivity extends AppCompatActivity implements AIListener{
         v.startAnimation(anim_out);
     }
 
-
     public void recibirDatos(){
         Bundle extras = this.getIntent().getExtras();
         this.nombre = extras.getString("nombre");
@@ -233,6 +276,7 @@ public class MainActivity extends AppCompatActivity implements AIListener{
 
     @Override
     public void onResult(ai.api.model.AIResponse response) {
+
         final Result result = response.getResult();
         String message = result.getResolvedQuery();
         ChatMensaje chatMensaje0 = new ChatMensaje(message, "user");
@@ -243,6 +287,8 @@ public class MainActivity extends AppCompatActivity implements AIListener{
         final Metadata metadata = result.getMetadata();
 
         if (metadata != null) {
+
+
             if(metadata.getIntentName().equals("Ubicacion")){
                 ref.child("Ubicacion/Direccion").addValueEventListener(new ValueEventListener() {
                     String ubicacion;
@@ -250,6 +296,7 @@ public class MainActivity extends AppCompatActivity implements AIListener{
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
                          ubicacion = dataSnapshot.getValue().toString();
+
                          ChatMensaje chatMensaje = new ChatMensaje(reply +" : "+ ubicacion, "bot");
                          ref.child("chat").push().setValue(chatMensaje);
                     }
@@ -257,9 +304,47 @@ public class MainActivity extends AppCompatActivity implements AIListener{
                     @Override
                     public void onCancelled(@NonNull DatabaseError databaseError) {
                     }
-
                 });
-            } else{
+            } else
+            if(metadata.getIntentName().equals("Comidas")){
+                final HashMap<String, JsonElement> params = result.getParameters();
+                if (params != null && !params.isEmpty()) {
+                    System.out.println("parameters");
+                    for (Map.Entry<String, JsonElement> entry : params.entrySet()) {
+                        this.comida = String.valueOf(entry.getValue());
+                        this.comida = comida.substring(1,comida.length()-1);
+
+                    }
+                    //Toast.makeText(MainActivity.this, ""+comida, Toast.LENGTH_LONG).show();
+                    Query q = BDLugares.orderByChild("Comida").equalTo(this.comida);
+                    ArrayList<String> listado = new ArrayList<String>();
+
+                    q.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            String datos="";
+                            ChatMensaje chatMensaje = new ChatMensaje(reply +" : ", "bot");
+                            ref.child("chat").push().setValue(chatMensaje);
+                            for(DataSnapshot datasnapshot: dataSnapshot.getChildren()) {
+
+                                lugar = datasnapshot.getValue(Lugar.class);
+                                datos = lugar.Nombre;
+                                chatMensaje = new ChatMensaje(datos, "bot");
+                                ref.child("chat").push().setValue(chatMensaje);
+                                System.out.println("Consulta " + datos);
+
+                            }
+
+                        }
+
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
+
+                        }
+                    });;
+                }
+            }
+            else{
                 Toast.makeText(this, metadata.getIntentName(), Toast.LENGTH_SHORT).show();
                 ChatMensaje chatMensaje = new ChatMensaje(reply, "bot");
                 ref.child("chat").push().setValue(chatMensaje);
