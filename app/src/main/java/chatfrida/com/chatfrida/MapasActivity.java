@@ -92,6 +92,9 @@ public class MapasActivity extends AppCompatActivity {
         final Drawable pizzaIcon = getResources().getDrawable(R.drawable.pizza);
         final Drawable sushiIcon = getResources().getDrawable(R.drawable.sushi);
         final Drawable hamburguesaIcon = getResources().getDrawable(R.drawable.hamburguesa);
+        final Drawable pastelIcon = getResources().getDrawable(R.drawable.pastel);
+        final Drawable heladoIcon = getResources().getDrawable(R.drawable.helado);
+        final Drawable panIcon = getResources().getDrawable(R.drawable.pan);
 
         ref.orderByChild("Puntaje").addChildEventListener(new ChildEventListener() {
 
@@ -120,13 +123,13 @@ public class MapasActivity extends AppCompatActivity {
                 GeoPoint point = new GeoPoint(lugar.Latitud,lugar.Longitud);
                 poiMarker.setPosition(point);
 
-                if(lugar.Comida.equals("Taqueria")){
+                if(lugar.Comida.equals("Tacos")){
                     poiMarker.setIcon(tacoIcon);
                 }
-                else if(lugar.Comida.equals("Restaurante") || lugar.Comida.equals("Restaurante-Bar")){
+                else if(lugar.Comida.equals("Restaurante") || lugar.Comida.equals("Restaurante Bar")){
                     poiMarker.setIcon(restauranteIcon);
                 }
-                else if(lugar.Comida.equals("Cafeteria")){
+                else if(lugar.Comida.equals("Cafeteria") || lugar.Comida.equals("Cafe")){
                     poiMarker.setIcon(cafeIcon);
                 }
                 else if(lugar.Comida.equals("Hamburguesas")){
@@ -135,8 +138,17 @@ public class MapasActivity extends AppCompatActivity {
                 else if(lugar.Comida.equals("Restaurante-Sushi")){
                     poiMarker.setIcon(sushiIcon);
                 }
-                else if(lugar.Comida.equals("Pizzeria")){
+                else if(lugar.Comida.equals("Pizzas")){
                     poiMarker.setIcon(pizzaIcon);
+                }
+                else if(lugar.Comida.equals("Pastel")){
+                    poiMarker.setIcon(pastelIcon);
+                }
+                else if(lugar.Comida.equals("Pan")){
+                    poiMarker.setIcon(panIcon);
+                }
+                else if(lugar.Comida.equals("Helados")){
+                    poiMarker.setIcon(heladoIcon);
                 }
                 poiMarkers.add(poiMarker);
              //
