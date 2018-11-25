@@ -75,7 +75,8 @@
             android:layout_marginEnd="27dp"
             android:contentDescription="@string/btnDesc"
             android:onClick="onClickMap"
-            android:src="@drawable/mapa" />
+            android:src="@drawable/mapa"
+            android:visibility="visible"/>
 
         <RelativeLayout
             android:layout_width="247dp"

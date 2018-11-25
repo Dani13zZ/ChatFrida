@@ -84,6 +84,7 @@ public class MainActivity extends AppCompatActivity implements AIListener{
         btnMapa = findViewById(R.id.btnMapa);
         BDLugares = FirebaseDatabase.getInstance().getReference("Lugares");
         recibirDatos();
+        generarDistancia();
         ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.RECORD_AUDIO},1);
 
         final LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
@@ -122,7 +123,6 @@ public class MainActivity extends AppCompatActivity implements AIListener{
 
                     aiRequest.setQuery(message);
                     new AsyncTask<AIRequest,Void,AIResponse>(){
-
                         @Override
                         protected AIResponse doInBackground(AIRequest... aiRequests) {
                             final AIRequest request = aiRequests[0];
@@ -137,14 +137,24 @@ public class MainActivity extends AppCompatActivity implements AIListener{
                         protected void onPostExecute(AIResponse response) {
                             if (response != null) {
                                 Result result = response.getResult();
-                                String reply = result.getFulfillment().getSpeech();
-                                if (reply.isEmpty()){
-                                    ChatMensaje chatMensaje = new ChatMensaje("no entiendo", "bot");
-                                    ref.child("chat").push().setValue(chatMensaje);
-                                }
-                                else{
-                                    ChatMensaje chatMensaje = new ChatMensaje(reply, "bot");
-                                    ref.child("chat").push().setValue(chatMensaje);
+                                final String reply = result.getFulfillment().getSpeech();
+                                final Metadata metadata = result.getMetadata();
+//                                ChatMensaje chatMensaje = new ChatMensaje(reply, "bot");
+//                                ref.child("chat").push().setValue(chatMensaje);
+                                if (metadata != null) {
+                                    if(metadata.getIntentName().equals("Ubicacion")){
+                                        obtenerUbicacion(reply);
+                                    }
+                                    else if(metadata.getIntentName().equals("Comidas")){
+                                             generarListaUbicaciones(result, reply);
+                                    } else
+                                        if (metadata.getIntentName().equals("Comidas - yes - yes - custom")) {
+                                            generarUbicacionCercana(result, reply);
+                                        }
+                                    else{
+                                        ChatMensaje chatMensaje = new ChatMensaje(reply, "bot");
+                                        ref.child("chat").push().setValue(chatMensaje);
+                                    }
                                 }
                             }
                         }
@@ -217,35 +227,6 @@ public class MainActivity extends AppCompatActivity implements AIListener{
         recyclerView.setAdapter(adapter);
     }
 
-
-    public void obtenerLugarSeleccionado(String c) {
-                Query q = BDLugares.orderByChild("Comida").equalTo(c);
-                 ArrayList<String> listado = new ArrayList<String>();
-
-                q.addListenerForSingleValueEvent(new ValueEventListener() {
-
-
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        String datos="";
-                        for(DataSnapshot datasnapshot: dataSnapshot.getChildren()) {
-
-                            lugar = datasnapshot.getValue(Lugar.class);
-                            datos = datos + " -, " + lugar.Nombre;
-                            // Toast.makeText(MainActivity.this, "He encontrado "+cont, Toast.LENGTH_LONG).show();
-                        }
-                    //    System.out.println("Consulta " + datos);
-                    }
-
-
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
-
-                    }
-                });;
-
-    }
-
     public void ImageViewAnimatedChange(Context c, final ImageView v, final Bitmap new_image) {
         final Animation anim_out = AnimationUtils.loadAnimation(c, R.anim.zoom_out);
         final Animation anim_in  = AnimationUtils.loadAnimation(c, R.anim.zoom_in);
@@ -287,67 +268,20 @@ public class MainActivity extends AppCompatActivity implements AIListener{
         final Metadata metadata = result.getMetadata();
 
         if (metadata != null) {
-
-
             if(metadata.getIntentName().equals("Ubicacion")){
-                ref.child("Ubicacion/Direccion").addValueEventListener(new ValueEventListener() {
-                    String ubicacion;
-
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                         ubicacion = dataSnapshot.getValue().toString();
-
-                         ChatMensaje chatMensaje = new ChatMensaje(reply +" : "+ ubicacion, "bot");
-                         ref.child("chat").push().setValue(chatMensaje);
-                    }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError databaseError) {
-                    }
-                });
-            } else
-            if(metadata.getIntentName().equals("Comidas")){
-                final HashMap<String, JsonElement> params = result.getParameters();
-                if (params != null && !params.isEmpty()) {
-                    System.out.println("parameters");
-                    for (Map.Entry<String, JsonElement> entry : params.entrySet()) {
-                        this.comida = String.valueOf(entry.getValue());
-                        this.comida = comida.substring(1,comida.length()-1);
-
-                    }
-                    //Toast.makeText(MainActivity.this, ""+comida, Toast.LENGTH_LONG).show();
-                    Query q = BDLugares.orderByChild("Comida").equalTo(this.comida);
-                    ArrayList<String> listado = new ArrayList<String>();
-
-                    q.addListenerForSingleValueEvent(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(DataSnapshot dataSnapshot) {
-                            String datos="";
-                            ChatMensaje chatMensaje = new ChatMensaje(reply +" : ", "bot");
-                            ref.child("chat").push().setValue(chatMensaje);
-                            for(DataSnapshot datasnapshot: dataSnapshot.getChildren()) {
-
-                                lugar = datasnapshot.getValue(Lugar.class);
-                                datos = lugar.Nombre;
-                                chatMensaje = new ChatMensaje(datos, "bot");
-                                ref.child("chat").push().setValue(chatMensaje);
-                                System.out.println("Consulta " + datos);
-
-                            }
-
-                        }
-
-                        @Override
-                        public void onCancelled(DatabaseError databaseError) {
-
-                        }
-                    });;
-                }
+                obtenerUbicacion(reply);
             }
-            else{
-                Toast.makeText(this, metadata.getIntentName(), Toast.LENGTH_SHORT).show();
-                ChatMensaje chatMensaje = new ChatMensaje(reply, "bot");
-                ref.child("chat").push().setValue(chatMensaje);
+            else
+                if(metadata.getIntentName().equals("Comidas")){
+                generarListaUbicaciones(result, reply);
+            }
+            else
+                if(metadata.getIntentName().equals("Comidas - yes - yes - custom")){
+                    generarUbicacionCercana(result, reply);
+                }
+                else{
+                    ChatMensaje chatMensaje = new ChatMensaje(reply, "bot");
+                    ref.child("chat").push().setValue(chatMensaje);
             }
         }
     }
@@ -385,6 +319,132 @@ public class MainActivity extends AppCompatActivity implements AIListener{
         mibundle.putString("longitud", myLongitud);
         siguiente.putExtras(mibundle);
         startActivity(siguiente);
+    }
+
+    public void generarDistancia(){
+        Query q = BDLugares.orderByChild("Comida");
+        q.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                String datos="";
+                double la1 = 0;
+                double lo1 = 0;
+                double la2 = 0;
+                double lo2 = 0;
+                double dist = 0;
+                int count = 0;
+                String c;
+                MedirDistancia distancia = new MedirDistancia();
+                for(DataSnapshot datasnapshot: dataSnapshot.getChildren()) {
+                    count++;
+
+                    lugar = datasnapshot.getValue(Lugar.class);
+                    la1 = Double.parseDouble(String.valueOf(myLatitud));
+                    lo1 = Double.parseDouble(String.valueOf(myLongitud));
+                    la2 = lugar.Latitud;
+                    lo2 = lugar.Longitud;
+
+                    dist = distancia.obtenerDistancia(la1,lo1,la2,lo2);
+                    System.out.println("ditancia " + dist);
+
+                    c = String.valueOf(count);
+                    BDLugares.child(c).child("Distancia").setValue(dist);
+                }
+
+                System.out.println("my latitud " + la1);
+                System.out.println("my longitud " + lo1);
+
+            }
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    private void generarUbicacionCercana(Result result, final String reply) {
+        final HashMap<String, JsonElement> params = result.getParameters();
+        if (params != null && !params.isEmpty()) {
+            System.out.println("parameters");
+            for (Map.Entry<String, JsonElement> entry : params.entrySet()) {
+                this.comida = String.valueOf(entry.getValue());
+                this.comida = this.comida.substring(1,this.comida.length()-1);
+
+            }
+       //     Query q = BDLugares.orderByChild("Comida").equalTo(comida);
+            Query q = BDLugares.orderByChild("Distancia").orderByChild("Comida").equalTo(comida);
+            q.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    String nombre,horario,distancia, puntaje="";
+                    ChatMensaje chatMensaje = new ChatMensaje(reply +"  ", "bot");
+                    ref.child("chat").push().setValue(chatMensaje);
+                    for(DataSnapshot datasnapshot: dataSnapshot.getChildren()) {
+                        lugar = datasnapshot.getValue(Lugar.class);
+                        nombre = lugar.Nombre;
+                        puntaje = String.valueOf(lugar.Puntaje);
+                        distancia = String.format("%.2f", lugar.Distancia);
+                        horario = String.valueOf(lugar.HorarioInicio) + " - "+String.valueOf(lugar.HorarioFin)+" hrs.";
+                        chatMensaje = new ChatMensaje(nombre+",\n Distancia : "+distancia+"km \n Horario : "+horario+
+                                "\n Puntaje : "+puntaje, "bot");
+                        ref.child("chat").push().setValue(chatMensaje);
+                    }
+                }
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
+        }
+    }
+    private void obtenerUbicacion(final String reply) {
+        ref.child("Ubicacion/Direccion").addValueEventListener(new ValueEventListener() {
+            String ubicacion;
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                ubicacion = dataSnapshot.getValue().toString();
+                ChatMensaje chatMensaje = new ChatMensaje(reply +" : "+ ubicacion, "bot");
+                ref.child("chat").push().setValue(chatMensaje);
+            }
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) { }
+        });
+    }
+
+    private void generarListaUbicaciones(Result result, final String reply) {
+        final HashMap<String, JsonElement> params = result.getParameters();
+        if (params != null && !params.isEmpty()) {
+            System.out.println("parameters");
+            for (Map.Entry<String, JsonElement> entry : params.entrySet()) {
+                this.comida = String.valueOf(entry.getValue());
+                this.comida = comida.substring(1,comida.length()-1);
+            }
+            Query q = BDLugares.orderByChild("Comida").equalTo(this.comida);
+            q.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    String nombre,horario,distancia, puntaje="";
+                    ChatMensaje chatMensaje = new ChatMensaje(reply +" : ", "bot");
+                    ref.child("chat").push().setValue(chatMensaje);
+                    for(DataSnapshot datasnapshot: dataSnapshot.getChildren()) {
+                        lugar = datasnapshot.getValue(Lugar.class);
+                        nombre = lugar.Nombre;
+                        puntaje = String.valueOf(lugar.Puntaje);
+                        distancia = String.format("%.2f", lugar.Distancia);
+                        horario = String.valueOf(lugar.HorarioInicio) + " - "+String.valueOf(lugar.HorarioFin)+" hrs.";
+                        chatMensaje = new ChatMensaje(nombre+",\n Distancia : "+distancia+"km \n Horario : "+horario+
+                                "\n Puntaje : "+puntaje, "bot");
+                        ref.child("chat").push().setValue(chatMensaje);
+                    }
+                    chatMensaje = new ChatMensaje("¿Quieres hacer una Busqueda mas Especifica?", "bot");
+                    ref.child("chat").push().setValue(chatMensaje);
+                }
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
+        }
     }
 
 }

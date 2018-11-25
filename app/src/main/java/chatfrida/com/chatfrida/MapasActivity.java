@@ -1,5 +1,6 @@
 package chatfrida.com.chatfrida;
 
+import android.database.MatrixCursor;
 import android.graphics.drawable.Drawable;
 import android.os.StrictMode;
 import android.support.annotation.NonNull;
@@ -34,13 +35,15 @@ public class MapasActivity extends AppCompatActivity {
     private String nombre;
     private double myLatitud;
     private double myLongitud;
-    static Lugar lugar;
-    static ArrayList<Lugar> lugares = new ArrayList<Lugar>();
+    private MedirDistancia distancia;
+    private Lugar lugar;
     FirebaseDatabase database = FirebaseDatabase.getInstance();
     DatabaseReference ref;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+         final ArrayList<Lugar> lugares = new ArrayList<Lugar>();
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_mapas);
         ref = database.getReference("Lugares");
@@ -92,10 +95,22 @@ public class MapasActivity extends AppCompatActivity {
 
         ref.orderByChild("Puntaje").addChildEventListener(new ChildEventListener() {
 
+            ArrayList<Double> listado = new ArrayList<Double>();
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String prevChildKey) {
+                double dist, val=0;
+                int count=0;
                 lugar = dataSnapshot.getValue(Lugar.class);
-                lugares.add(lugar);
+
+              //  dist = distancia.obtenerDistancia(myLatitud, myLongitud,lugar.Latitud , lugar.Longitud);
+                //listado.add(dist);
+                 lugares.add(lugar);
+
+//                if(listado.get(count)>val){
+//                    val = listado.get(count);
+//                }
+                //Toast.makeText(MapasActivity.this, ""+val, Toast.LENGTH_SHORT).show();
+
                 Marker poiMarker = new Marker(mapa);
                 poiMarker.setTitle(lugar.Nombre+"("+lugar.Comida+")");
                 poiMarker.setSnippet(lugar.Direccion);
@@ -124,7 +139,8 @@ public class MapasActivity extends AppCompatActivity {
                     poiMarker.setIcon(pizzaIcon);
                 }
                 poiMarkers.add(poiMarker);
-                System.out.println("direccion 123 "+lugar.Direccion+"  "+ lugar.Longitud+ "  "+lugar.Latitud+"  "+lugar.Puntaje);
+             //
+                //   System.out.println("direccion 123 "+lugar.Direccion+"  "+ lugar.Longitud+ "  "+lugar.Latitud+"  "+lugar.Puntaje);
             }
 
             @Override
@@ -147,6 +163,11 @@ public class MapasActivity extends AppCompatActivity {
 
             }
         });
+        if (lugares.isEmpty()) {
+            System.out.println("direccion 123 " );
+        }
+
+
         mapa.invalidate();
     }
 

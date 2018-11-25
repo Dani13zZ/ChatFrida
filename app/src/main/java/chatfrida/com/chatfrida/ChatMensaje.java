@@ -22,6 +22,7 @@ public class ChatMensaje {
     }
 
     public String getMsgUser() {
+
         return msgUser;
     }
 

@@ -10,8 +10,8 @@ public class Lugar {
     public double Latitud;
     public double Longitud;
     public double Puntaje;
-
-    public Lugar(String direccion,String comida, String nombre, int horarioFin, int horarioInicio, double latitud, double longitud, double puntaje) {
+    public double Distancia;
+    public Lugar(String direccion,String comida, String nombre, int horarioFin, int horarioInicio, double latitud, double longitud, double puntaje, double distancia) {
         this.Direccion = direccion;
         this.Nombre = nombre;
         this.Comida = comida;
@@ -20,6 +20,7 @@ public class Lugar {
         this.Latitud = latitud;
         this.Longitud = longitud;
         this.Puntaje = puntaje;
+        this.Distancia = distancia;
     }
     public  Lugar(){}
 

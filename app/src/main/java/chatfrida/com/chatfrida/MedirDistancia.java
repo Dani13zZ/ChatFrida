@@ -4,7 +4,7 @@ public class MedirDistancia {
     public MedirDistancia(){
 
     }
-    public static double obtenerDistancia(double lat1, double lng1, double lat2, double lng2) {
+    public double obtenerDistancia(double lat1, double lng1, double lat2, double lng2) {
         //double radioTierra = 3958.75;//en millas
 
         double radioTierra = 6371;//en kilómetros
