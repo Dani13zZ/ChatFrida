@@ -371,43 +371,6 @@ public class MainActivity extends AppCompatActivity implements AIListener{
                 this.comida = this.comida.substring(1,this.comida.length()-1);
 
             }
-//            Query q = BDLugares.orderByChild("Comida").equalTo(this.comida);
-//            q.addListenerForSingleValueEvent(new ValueEventListener() {
-//                @Override
-//                public void onDataChange(DataSnapshot dataComida) {
-//                    Lugar data = dataComida.getValue(Lugar.class);
-//                    Query q = BDLugares.orderByChild("Distancia").limitToLast(1);
-//                    q.addListenerForSingleValueEvent(new ValueEventListener() {
-//                        @Override
-//                        public void onDataChange(DataSnapshot dataSnapshot) {
-//                            String nombre,horario,distancia, puntaje="";
-//                            ChatMensaje chatMensaje = new ChatMensaje(reply +"  ", "bot");
-//                            ref.child("chat").push().setValue(chatMensaje);
-//                            for(DataSnapshot datasnapshot: dataSnapshot.getChildren()) {
-//                                lugar = datasnapshot.getValue(Lugar.class);
-//                                nombre = lugar.Nombre;
-//                                puntaje = String.valueOf(lugar.Puntaje);
-//                                distancia = String.format("%.2f", lugar.Distancia);
-//                                horario = String.valueOf(lugar.HorarioInicio) + " - "+String.valueOf(lugar.HorarioFin)+" hrs.";
-//                                chatMensaje = new ChatMensaje(nombre+",\n Distancia : "+distancia+"km \n Horario : "+horario+
-//                                        "\n Puntaje : "+puntaje, "bot");
-//                                ref.child("chat").push().setValue(chatMensaje);
-//                            }
-//                        }
-//                        @Override
-//                        public void onCancelled(DatabaseError databaseError) {
-//
-//                        }
-//                    });
-//                }
-//
-//                @Override
-//                public void onCancelled(DatabaseError databaseError) {
-//                    // ...
-//                }
-//            });
-
-
             Query q = BDLugares.orderByChild("Comida").equalTo(comida).limitToLast(1);
             q.addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override

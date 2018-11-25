@@ -1,6 +1,6 @@
 package chatfrida.com.chatfrida;
 
-import android.database.MatrixCursor;
+
 import android.graphics.drawable.Drawable;
 import android.os.StrictMode;
 import android.support.annotation.NonNull;
@@ -17,8 +17,6 @@ import com.google.firebase.database.FirebaseDatabase;
 
 import org.osmdroid.api.IMapController;
 import org.osmdroid.bonuspack.clustering.RadiusMarkerClusterer;
-import org.osmdroid.bonuspack.location.NominatimPOIProvider;
-import org.osmdroid.bonuspack.location.POI;
 import org.osmdroid.bonuspack.routing.OSRMRoadManager;
 import org.osmdroid.bonuspack.routing.Road;
 import org.osmdroid.bonuspack.routing.RoadManager;
@@ -104,16 +102,7 @@ public class MapasActivity extends AppCompatActivity {
                 double dist, val=0;
                 int count=0;
                 lugar = dataSnapshot.getValue(Lugar.class);
-
-              //  dist = distancia.obtenerDistancia(myLatitud, myLongitud,lugar.Latitud , lugar.Longitud);
-                //listado.add(dist);
-                 lugares.add(lugar);
-
-//                if(listado.get(count)>val){
-//                    val = listado.get(count);
-//                }
-                //Toast.makeText(MapasActivity.this, ""+val, Toast.LENGTH_SHORT).show();
-
+                lugares.add(lugar);
                 Marker poiMarker = new Marker(mapa);
                 poiMarker.setTitle(lugar.Nombre+"("+lugar.Comida+")");
                 poiMarker.setSnippet(lugar.Direccion);
